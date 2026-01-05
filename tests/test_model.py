@@ -1,7 +1,17 @@
-# tests/test_model.py
 import pytest
+from unittest.mock import patch
+
 from app.api.ml_model import predict
 
+# Mock MLflow model
+class MockModel:
+    def predict(self, df):
+        return [3600.0 for _ in range(len(df))]  # 1 hour in seconds
+
+@pytest.fixture(autouse=True)
+def mock_mlflow():
+    with patch("app.api.ml_model.mlflow.pyfunc.load_model", return_value=MockModel()):
+        yield
 
 def test_predict_single():
     sample_data = [{
@@ -31,11 +41,10 @@ def test_predict_single():
     preds = predict(sample_data)
     assert isinstance(preds, list)
     assert len(preds) == 1
-    assert preds[0] > 0  # trip duration must be positive
-
+    assert preds[0] > 0
 
 def test_predict_multiple():
-    sample_data = sample_data = [
+    sample_data = [
         {
             "vendor_id": 1,
             "passenger_count": 1,
