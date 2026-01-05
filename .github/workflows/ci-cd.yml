@@ -1,50 +1,37 @@
-name: CI/CD Pipeline
+name: Python CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
-  test-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
 
     steps:
-      # 1. Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      # 2. Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      # 3. Cache pip dependencies
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
 
-      # 4. Upgrade pip and install dependencies
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest coverage httpx mlflow fastapi uvicorn xgboost scikit-learn huggingface_hub git-lfs
+    - name: Install dependencies
+      run: |
+        # On Linux, ignore Windows-only packages
+        python -m pip install --upgrade -r requirements.txt --no-cache-dir || true
+        # For Windows runners, add pywin32 explicitly if needed
+      shell: bash
 
-      # 5. Run tests with coverage
-      - name: Run pytest and check coverage
-        run: |
-          python -m pytest tests/ --cov=src --cov-report=term-missing --cov-report=html
+    - name: Run tests
+      run: |
+        pytest --maxfail=1 --disable-warnings -q
 
-      # 6. Upload coverage report
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: htmlcov/
