@@ -20,7 +20,13 @@ jobs:
     # 1. Checkout repo
     - uses: actions/checkout@v3
 
-    # 2. Set up Python
+    # 2. Install Git LFS and pull files
+    - name: Set up Git LFS
+      run: |
+        git lfs install
+        git lfs pull
+
+    # 3. Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
