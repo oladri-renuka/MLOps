@@ -1,0 +1,88 @@
+# tests/test_model.py
+import pytest
+from app.api.ml_model import predict
+
+
+def test_predict_single():
+    sample_data = [{
+        "vendor_id": 1,
+        "passenger_count": 2,
+        "pickup_longitude": -73.985,
+        "pickup_latitude": 40.765,
+        "dropoff_longitude": -73.981,
+        "dropoff_latitude": 40.751,
+        "store_and_fwd_flag": 0,
+        "haversine_distance": 1.5,
+        "manhattan_distance": 2.0,
+        "pickup_hour": 10,
+        "pickup_day_of_week": 2,
+        "pickup_month": 5,
+        "pickup_day": 15,
+        "is_rush_hour": 1,
+        "is_weekend": 0,
+        "hour_sin": 0.5,
+        "hour_cos": 0.866,
+        "dow_sin": 0.9,
+        "dow_cos": 0.4,
+        "pickup_cluster": 1,
+        "dropoff_cluster": 2
+    }]
+
+    preds = predict(sample_data)
+    assert isinstance(preds, list)
+    assert len(preds) == 1
+    assert preds[0] > 0  # trip duration must be positive
+
+
+def test_predict_multiple():
+    sample_data = sample_data = [
+        {
+            "vendor_id": 1,
+            "passenger_count": 1,
+            "pickup_longitude": -73.985,
+            "pickup_latitude": 40.765,
+            "dropoff_longitude": -73.981,
+            "dropoff_latitude": 40.751,
+            "store_and_fwd_flag": 0,
+            "haversine_distance": 1.0,
+            "manhattan_distance": 1.5,
+            "pickup_hour": 9,
+            "pickup_day_of_week": 1,
+            "pickup_month": 6,
+            "pickup_day": 10,
+            "is_rush_hour": 1,
+            "is_weekend": 0,
+            "hour_sin": 0.4,
+            "hour_cos": 0.9,
+            "dow_sin": 0.8,
+            "dow_cos": 0.6,
+            "pickup_cluster": 0,
+            "dropoff_cluster": 1
+        },
+        {
+            "vendor_id": 2,
+            "passenger_count": 3,
+            "pickup_longitude": -73.981,
+            "pickup_latitude": 40.751,
+            "dropoff_longitude": -73.970,
+            "dropoff_latitude": 40.730,
+            "store_and_fwd_flag": 1,
+            "haversine_distance": 2.0,
+            "manhattan_distance": 2.5,
+            "pickup_hour": 18,
+            "pickup_day_of_week": 5,
+            "pickup_month": 7,
+            "pickup_day": 20,
+            "is_rush_hour": 1,
+            "is_weekend": 1,
+            "hour_sin": 0.9,
+            "hour_cos": -0.4,
+            "dow_sin": 0.7,
+            "dow_cos": 0.7,
+            "pickup_cluster": 2,
+            "dropoff_cluster": 3
+        }
+    ]
+    preds = predict(sample_data)
+    assert len(preds) == 2
+    assert all(p > 0 for p in preds)

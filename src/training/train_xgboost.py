@@ -12,6 +12,7 @@ def train(df):
         'id', 'pickup_datetime', 'dropoff_datetime',
         'trip_duration', 'log_trip_duration'
     ]]
+    print("Features used for training:", features)
 
     X = df[features]
     y = df['log_trip_duration']
