@@ -1,17 +1,38 @@
 # tests/test_api.py
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
 from app.api.main import app
 
 client = TestClient(app)
 
+# ------------------------
+# Fixture to mock MLflow model
+# ------------------------
+@pytest.fixture(autouse=True)
+def mock_mlflow_model():
+    """
+    Automatically mocks mlflow.pyfunc.load_model() so tests don't require a real model.
+    Returns a dummy model with a predict() method.
+    """
+    with patch("app.api.ml_model.mlflow.pyfunc.load_model") as mock_load:
+        mock_model = MagicMock()
+        mock_model.predict.return_value = [10.5]  # dummy prediction
+        mock_load.return_value = mock_model
+        yield
 
+# ------------------------
+# Test root endpoint
+# ------------------------
 def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
-    assert "message" in response.json()
+    data = response.json()
+    assert "message" in data
 
-
+# ------------------------
+# Test /predict endpoint
+# ------------------------
 def test_predict_endpoint():
     sample_payload = [
         {
