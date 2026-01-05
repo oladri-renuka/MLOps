@@ -13,25 +13,44 @@ jobs:
       matrix:
         python-version: [3.11]
 
+    env:
+      PYTHONPATH: ${{ github.workspace }}  # Makes repo root visible to Python
+
     steps:
+    # 1. Checkout repo
     - uses: actions/checkout@v3
 
+    # 2. Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
+    # 3. Cache pip dependencies
+    - name: Cache pip
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # 4. Upgrade pip
     - name: Upgrade pip
       run: python -m pip install --upgrade pip
 
+    # 5. Install dependencies
     - name: Install dependencies
-      run: |
-        # On Linux, ignore Windows-only packages
-        python -m pip install --upgrade -r requirements.txt --no-cache-dir || true
-        # For Windows runners, add pywin32 explicitly if needed
-      shell: bash
+      run: python -m pip install -r requirements.txt --no-cache-dir
 
-    - name: Run tests
+    # 6. Run tests with coverage
+    - name: Run pytest and check coverage
       run: |
-        pytest --maxfail=1 --disable-warnings -q
+        python -m pytest tests/ --maxfail=1 --disable-warnings --cov=src --cov-report=term-missing --cov-report=html
 
+    # 7. Upload coverage report artifact
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: htmlcov/
