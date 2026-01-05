@@ -1,6 +1,5 @@
-# tests/test_model.py
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from app.api.ml_model import predict
 
 @pytest.fixture
@@ -80,18 +79,27 @@ def sample_data_multiple():
         }
     ]
 
-# Mock the MLflow model predict
-@patch("app.api.ml_model.model.predict")
-def test_predict_single(mock_predict, sample_data_single):
-    mock_predict.return_value = [3.0]  # pretend model returns log1p(trip_duration)
+# Patch mlflow load_model to return a mock model with a predict method
+@pytest.fixture(autouse=True)
+def mock_mlflow_model():
+    mock_model = MagicMock()
+    mock_model.predict.side_effect = lambda df: [3.0 for _ in range(len(df))]  # log1p dummy
+    with patch("app.api.ml_model.mlflow.pyfunc.load_model", return_value=mock_model):
+        # reload module so 'model' gets the mock
+        import importlib
+        import app.api.ml_model as ml_model
+        importlib.reload(ml_model)
+        yield
+
+def test_predict_single(sample_data_single):
+    from app.api.ml_model import predict
     preds = predict(sample_data_single)
     assert isinstance(preds, list)
     assert len(preds) == 1
     assert all(p > 0 for p in preds)
 
-@patch("app.api.ml_model.model.predict")
-def test_predict_multiple(mock_predict, sample_data_multiple):
-    mock_predict.return_value = [3.0, 4.0]
+def test_predict_multiple(sample_data_multiple):
+    from app.api.ml_model import predict
     preds = predict(sample_data_multiple)
     assert len(preds) == 2
     assert all(p > 0 for p in preds)
