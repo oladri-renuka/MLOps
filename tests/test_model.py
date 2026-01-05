@@ -1,20 +1,11 @@
+# tests/test_model.py
 import pytest
 from unittest.mock import patch
-
 from app.api.ml_model import predict
 
-# Mock MLflow model
-class MockModel:
-    def predict(self, df):
-        return [3600.0 for _ in range(len(df))]  # 1 hour in seconds
-
-@pytest.fixture(autouse=True)
-def mock_mlflow():
-    with patch("app.api.ml_model.mlflow.pyfunc.load_model", return_value=MockModel()):
-        yield
-
-def test_predict_single():
-    sample_data = [{
+@pytest.fixture
+def sample_data_single():
+    return [{
         "vendor_id": 1,
         "passenger_count": 2,
         "pickup_longitude": -73.985,
@@ -38,13 +29,9 @@ def test_predict_single():
         "dropoff_cluster": 2
     }]
 
-    preds = predict(sample_data)
-    assert isinstance(preds, list)
-    assert len(preds) == 1
-    assert preds[0] > 0
-
-def test_predict_multiple():
-    sample_data = [
+@pytest.fixture
+def sample_data_multiple():
+    return [
         {
             "vendor_id": 1,
             "passenger_count": 1,
@@ -92,6 +79,19 @@ def test_predict_multiple():
             "dropoff_cluster": 3
         }
     ]
-    preds = predict(sample_data)
+
+# Mock the MLflow model predict
+@patch("app.api.ml_model.model.predict")
+def test_predict_single(mock_predict, sample_data_single):
+    mock_predict.return_value = [3.0]  # pretend model returns log1p(trip_duration)
+    preds = predict(sample_data_single)
+    assert isinstance(preds, list)
+    assert len(preds) == 1
+    assert all(p > 0 for p in preds)
+
+@patch("app.api.ml_model.model.predict")
+def test_predict_multiple(mock_predict, sample_data_multiple):
+    mock_predict.return_value = [3.0, 4.0]
+    preds = predict(sample_data_multiple)
     assert len(preds) == 2
     assert all(p > 0 for p in preds)
