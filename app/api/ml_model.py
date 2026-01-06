@@ -4,16 +4,18 @@ import pandas as pd
 import numpy as np
 
 # Model URI
-MODEL_URI = "runs:/377fed7b556e427faae3ae0f65fd28f8/model"
+MODEL_URI = "app/model"
 
 # Lazy-loaded model
 _model = None
+
 
 def get_model():
     global _model
     if _model is None:
         _model = mlflow.pyfunc.load_model(MODEL_URI)
     return _model
+
 
 def predict(data):
     """
