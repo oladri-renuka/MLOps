@@ -1,0 +1,22 @@
+artifact_path: file:C:/Users/SHARA/Downloads/MLOps/mlruns/289579387758828949/models/m-64c81d065af54af38cb7c404e7783e72/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.14.2
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.core.Booster
+    model_format: ubj
+    xgb_version: 3.1.2
+mlflow_version: 3.8.1
+model_id: m-64c81d065af54af38cb7c404e7783e72
+model_size_bytes: 33456702
+model_uuid: m-64c81d065af54af38cb7c404e7783e72
+prompts: null
+run_id: 5ea01b8408b14bd0887644cdb026af11
+utc_time_created: '2026-01-06 03:18:39.298446'
