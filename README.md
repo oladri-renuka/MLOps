@@ -200,24 +200,39 @@ POST https://taxi-gi7q.onrender.com/predict
 *Prediction is returned in seconds.*
 
 ---
-### Coverage report
+
+## Test Coverage Report
+
+Automated tests were executed using **pytest** with **coverage analysis** to ensure code reliability and correctness across the feature engineering, preprocessing, and training modules.
+
+### Coverage Summary
+
+```
 Name                             Stmts   Miss  Cover
 ----------------------------------------------------
-src\features\__init__.py             0      0   100%
-src\features\clusters.py             7      0   100%
-src\features\distance.py            12      0   100%
-src\features\time_features.py       14      0   100%
-src\preprocessing\__init__.py        0      0   100%
-src\preprocessing\clean.py           7      0   100%
-src\preprocessing\load_data.py       7      1    86%
-src\preprocessing\outliers.py        4      0   100%
-src\training\__init__.py             0      0   100%
-src\training\train_xgboost.py       22      0   100%
-src\utils\__init__.py                0      0   100%
+src/features/__init__.py             0      0   100%
+src/features/clusters.py             7      0   100%
+src/features/distance.py            12      0   100%
+src/features/time_features.py       14      0   100%
+src/preprocessing/__init__.py        0      0   100%
+src/preprocessing/clean.py           7      0   100%
+src/preprocessing/load_data.py       7      1    86%
+src/preprocessing/outliers.py        4      0   100%
+src/training/__init__.py             0      0   100%
+src/training/train_xgboost.py       22      0   100%
+src/utils/__init__.py                0      0   100%
 ----------------------------------------------------
 TOTAL                               73      1    99%
+```
+
+### Key Highlights
+
+* **Overall Coverage**: **99%**
+* All **core ML logic**, feature engineering, and training code are fully covered.
+* Ensures **training–inference reliability** and **safe refactoring**.
 
 ---
+
 ## Testing the API
 
 Use the provided client script:
